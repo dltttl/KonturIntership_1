@@ -3,3 +3,5 @@
 ################################################################################
 
 /.vs/KizhiPart1/v16/Server/sqlite3
+/Assemblies/NUnit
+/obj/Debug
