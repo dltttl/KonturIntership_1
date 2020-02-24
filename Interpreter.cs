@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Linq;
 
 namespace KizhiPart1
 {
@@ -9,7 +9,7 @@ namespace KizhiPart1
     {
         private TextWriter _writer;
 
-        private  readonly Dictionary<string, Action<string, int>> _commands;
+        private  readonly Dictionary<string, Action<string[]>> _commands;
 
         private  readonly Dictionary<string, int> _variables;
 
@@ -19,46 +19,46 @@ namespace KizhiPart1
         {
             _writer = writer;
 
-            _commands = new Dictionary<string, Action<string, int>>();
+            _commands = new Dictionary<string, Action<string[]>>();
             _variables = new Dictionary<string, int>();
             _errorMessage = "Переменная отсутствует в памяти";
 
-            _commands.Add("set", (variable, parameter ) =>
+            _commands.Add("set", (parameters ) =>
             {
-                if (_variables.ContainsKey(variable))
-                    _variables[variable] = parameter;
-                else _variables.Add(variable, parameter);
+                if (_variables.ContainsKey(parameters[0]))
+                    _variables[parameters[0]] = int.Parse(parameters[1]);
+                else _variables.Add(parameters[0], int.Parse(parameters[1]));
             });
-            _commands.Add("sub", (variable, parameter) =>
+            _commands.Add("sub", (parameters) =>
             {
-                if (!_variables.ContainsKey(variable))
+                if (!_variables.ContainsKey(parameters[0]))
                 {
                     _writer.WriteLine(_errorMessage);
                     return;
                 }
 
-                _variables[variable] -= parameter;
+                _variables[parameters[0]] -= int.Parse(parameters[1]);
             });
-            _commands.Add("print", (variable, parameter) =>
+            _commands.Add("print", (parameters) =>
             {
-                if (!_variables.ContainsKey(variable))
+                if (!_variables.ContainsKey(parameters[0]))
                 {
                     _writer.WriteLine(_errorMessage);
                     return;
                 }
 
-                _writer.WriteLine(_variables[variable]);
+                _writer.WriteLine(_variables[parameters[0]]);
             });
 
-            _commands.Add("rem", (variable, parameter) =>
+            _commands.Add("rem", (parameters) =>
             {
-                if (!_variables.ContainsKey(variable))
+                if (!_variables.ContainsKey(parameters[0]))
                 {
                     _writer.WriteLine(_errorMessage);
                     return;
                 }
 
-                _variables.Remove(variable);
+                _variables.Remove(parameters[0]);
             });
 
         }
@@ -66,9 +66,10 @@ namespace KizhiPart1
         public void ExecuteLine(string command)
         {
             var splitedCommand = command.Split(' ');
+            var commandName = splitedCommand[0];
+            var parameters = splitedCommand.Skip(1).ToArray();
 
-            _commands[splitedCommand[0]](splitedCommand[1],
-                splitedCommand.Length == 3 ? int.Parse(splitedCommand[2]) : 0);
+            _commands[commandName](parameters);
 
         }
     }
