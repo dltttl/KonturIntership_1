@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 
 namespace KizhiPart1
 {
@@ -9,7 +10,7 @@ namespace KizhiPart1
     {
         private TextWriter _writer;
 
-        private  readonly Dictionary<string, Action<string[]>> _commands;
+        private  readonly Dictionary<string, Action<string, string[]>> _commands;
 
         private  readonly Dictionary<string, int> _variables;
 
@@ -19,57 +20,58 @@ namespace KizhiPart1
         {
             _writer = writer;
 
-            _commands = new Dictionary<string, Action<string[]>>();
+            
             _variables = new Dictionary<string, int>();
             _errorMessage = "Переменная отсутствует в памяти";
-
-            _commands.Add("set", (parameters ) =>
+            _commands = new Dictionary<string, Action<string, string[]>>
             {
-                if (_variables.ContainsKey(parameters[0]))
-                    _variables[parameters[0]] = int.Parse(parameters[1]);
-                else _variables.Add(parameters[0], int.Parse(parameters[1]));
-            });
-            _commands.Add("sub", (parameters) =>
-            {
-                if (!_variables.ContainsKey(parameters[0]))
+                ["set"] = (variable, parameters) =>
                 {
-                    _writer.WriteLine(_errorMessage);
-                    return;
-                }
-
-                _variables[parameters[0]] -= int.Parse(parameters[1]);
-            });
-            _commands.Add("print", (parameters) =>
-            {
-                if (!_variables.ContainsKey(parameters[0]))
+                    if (_variables.ContainsKey(variable))
+                        _variables[variable] = int.Parse(parameters[0]);
+                    else _variables.Add(variable, int.Parse(parameters[0]));
+                },
+                ["sub"] = (variable, parameters) =>
                 {
-                    _writer.WriteLine(_errorMessage);
-                    return;
-                }
+                    if (!_variables.ContainsKey(variable))
+                    {
+                        _writer.WriteLine(_errorMessage);
+                        return;
+                    }
 
-                _writer.WriteLine(_variables[parameters[0]]);
-            });
-
-            _commands.Add("rem", (parameters) =>
-            {
-                if (!_variables.ContainsKey(parameters[0]))
+                    _variables[variable] -= int.Parse(parameters[0]);
+                },
+                ["print"] = (variable, parameters) =>
                 {
-                    _writer.WriteLine(_errorMessage);
-                    return;
+                    if (!_variables.ContainsKey(variable))
+                    {
+                        _writer.WriteLine(_errorMessage);
+                        return;
+                    }
+
+                    _writer.WriteLine(_variables[variable]);
+                },
+                ["rem"] = (variable, parameters) =>
+                {
+                    if (!_variables.ContainsKey(variable))
+                    {
+                        _writer.WriteLine(_errorMessage);
+                        return;
+                    }
+
+                    _variables.Remove(variable);
                 }
-
-                _variables.Remove(parameters[0]);
-            });
-
+            };
         }
 
         public void ExecuteLine(string command)
         {
             var splitedCommand = command.Split(' ');
             var commandName = splitedCommand[0];
-            var parameters = splitedCommand.Skip(1).ToArray();
+            var variableName = splitedCommand[1];
+            var parameters = splitedCommand.Skip(2).ToArray();
 
-            _commands[commandName](parameters);
+            _commands[commandName](variableName, parameters);
 
         }
     }
