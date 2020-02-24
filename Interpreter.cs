@@ -14,7 +14,7 @@ namespace KizhiPart1
 
         private  readonly Dictionary<string, int> _variables;
 
-        private readonly string _errorMessage = "Переменная отсутствует в памяти";;
+        private readonly string _errorMessage = "Переменная отсутствует в памяти";
 
         public Interpreter(TextWriter writer)
         {
