@@ -14,15 +14,12 @@ namespace KizhiPart1
 
         private  readonly Dictionary<string, int> _variables;
 
-        private readonly string _errorMessage;
+        private readonly string _errorMessage = "Переменная отсутствует в памяти";;
 
         public Interpreter(TextWriter writer)
         {
             _writer = writer;
-
-            
             _variables = new Dictionary<string, int>();
-            _errorMessage = "Переменная отсутствует в памяти";
             _commands = new Dictionary<string, Action<string, string[]>>
             {
                 ["set"] = (variable, parameters) =>
