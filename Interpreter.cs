@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Emit;
 
 namespace KizhiPart1
 {
@@ -29,7 +28,7 @@ namespace KizhiPart1
             };
         }
 
-        public void ExecuteLine(string command)
+        private void ExecuteLine(string command)
         {
             var parsedCommand = command.Split(' ');
 
@@ -39,12 +38,12 @@ namespace KizhiPart1
             _commands[commandType](commandParameters);
         }
 
-        public void Set(string variableName, int settingValue)
+        private void Set(string variableName, int settingValue)
         {
             _variables[variableName] = settingValue;
         }
 
-        public void Sub(string variableName, int subbingValue)
+        private void Sub(string variableName, int subbingValue)
         {
             if (!_variables.ContainsKey(variableName))
             {
@@ -55,7 +54,7 @@ namespace KizhiPart1
             _variables[variableName] -= subbingValue;
         }
 
-        public void Print(string variableName)
+        private void Print(string variableName)
         {
             if (!_variables.ContainsKey(variableName))
             {
@@ -66,7 +65,7 @@ namespace KizhiPart1
             _writer.WriteLine(_variables[variableName]);
         }
 
-        public void Remove(string variableName)
+        private void Remove(string variableName)
         {
             if (!_variables.ContainsKey(variableName))
             {
