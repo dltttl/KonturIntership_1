@@ -8,68 +8,73 @@ namespace KizhiPart1
 {
     public class Interpreter
     {
-        private TextWriter _writer;
+        private readonly TextWriter _writer;
 
-        private  readonly Dictionary<string, Action<string, string[]>> _commands;
+        private  readonly Dictionary<string, Action<string[]>> _commands;
 
         private  readonly Dictionary<string, int> _variables;
 
-        private readonly string _errorMessage = "Переменная отсутствует в памяти";
+        private const string ErrorMessage = "Переменная отсутствует в памяти";
 
         public Interpreter(TextWriter writer)
         {
             _writer = writer;
             _variables = new Dictionary<string, int>();
-            _commands = new Dictionary<string, Action<string, string[]>>
+            _commands = new Dictionary<string, Action<string[]>>
             {
-                ["set"] = (variable, parameters) =>
-                {
-                    if (_variables.ContainsKey(variable))
-                        _variables[variable] = int.Parse(parameters[0]);
-                    else _variables.Add(variable, int.Parse(parameters[0]));
-                },
-                ["sub"] = (variable, parameters) =>
-                {
-                    if (!_variables.ContainsKey(variable))
-                    {
-                        _writer.WriteLine(_errorMessage);
-                        return;
-                    }
-
-                    _variables[variable] -= int.Parse(parameters[0]);
-                },
-                ["print"] = (variable, parameters) =>
-                {
-                    if (!_variables.ContainsKey(variable))
-                    {
-                        _writer.WriteLine(_errorMessage);
-                        return;
-                    }
-
-                    _writer.WriteLine(_variables[variable]);
-                },
-                ["rem"] = (variable, parameters) =>
-                {
-                    if (!_variables.ContainsKey(variable))
-                    {
-                        _writer.WriteLine(_errorMessage);
-                        return;
-                    }
-
-                    _variables.Remove(variable);
-                }
+                ["set"] = (parameters) => Set(parameters[0], int.Parse(parameters[1])),
+                ["sub"] = (parameters) => Sub(parameters[0], int.Parse(parameters[1])),
+                ["print"] = (parameters) => Print(parameters[0]),
+                ["rem"] = (parameters)=>Remove(parameters[0])
             };
         }
 
         public void ExecuteLine(string command)
         {
-            var splitedCommand = command.Split(' ');
-            var commandName = splitedCommand[0];
-            var variableName = splitedCommand[1];
-            var parameters = splitedCommand.Skip(2).ToArray();
+            var parsedCommand = command.Split(' ');
 
-            _commands[commandName](variableName, parameters);
+            var commandType = parsedCommand.First();
+            var commandParameters = parsedCommand.Skip(1).ToArray();
 
+            _commands[commandType](commandParameters);
+        }
+
+        public void Set(string variableName, int settingValue)
+        {
+            _variables[variableName] = settingValue;
+        }
+
+        public void Sub(string variableName, int subbingValue)
+        {
+            if (!_variables.ContainsKey(variableName))
+            {
+                _writer.WriteLine(ErrorMessage);
+                return;
+            }
+
+            _variables[variableName] -= subbingValue;
+        }
+
+        public void Print(string variableName)
+        {
+            if (!_variables.ContainsKey(variableName))
+            {
+                _writer.WriteLine(ErrorMessage);
+                return;
+            }
+
+            _writer.WriteLine(_variables[variableName]);
+        }
+
+        public void Remove(string variableName)
+        {
+            if (!_variables.ContainsKey(variableName))
+            {
+                _writer.WriteLine(ErrorMessage);
+                return;
+            }
+
+            _variables.Remove(variableName);
         }
     }
 }
