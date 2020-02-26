@@ -28,7 +28,7 @@ namespace KizhiPart1
             };
         }
 
-        private void ExecuteLine(string command)
+        public void ExecuteLine(string command)
         {
             var parsedCommand = command.Split(' ');
 
